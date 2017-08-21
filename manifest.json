@@ -1,0 +1,15 @@
+{
+    "name": "pronto-move-shard",
+    "version": "0.0.1",
+    "description": "A shard moving game",
+    "engines": {
+        "arangodb": "^3.2.0"
+    },
+    "defaultDocument": "index.html",
+    "author": "Andreas Streichardt",
+    "license": "Apache 2",
+    "main": "main.js",
+    "files": {
+        "/": "frontend/"
+    }
+}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+      <script type="text/javascript" src="victor.js"></script>
+    <script type="text/javascript" src="Tween.js"></script>
+    <meta charset="utf8"/>
+    <style type="text/css">
+      #sign-container {
+        position: absolute;
+        z-index: -1;
+        /*display: none;*/
+      }
+
+      object {
+        transform: rotate(-15deg);
+        width: 400px;
+      }
+
+      #wrapper {
+        display: flex;
+      }
+      #left {
+        flex: 0 0 65%;
+      }
+      #right {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="left">
+        <div id="sign-container">
+          <object type="image/svg+xml"></object>
+        </div>
+        <canvas width="1200" height="700">
+      </div>
+      <div id="right">
+        <div>
+        <select id="shards" disabled="disabled" name="shards" onChange="shardSelected(this)">
+          <option value="" selected>-- Select a shard --</option>
+        </select>
+        </div>
+        <button id="pronto" onclick="startMoving()" disabled="disabled">Pronto move shard!</button>
+      </div>
+    </div>
+    <script type="text/javascript" src="pronto-move-shard.js"></script>
+  </body>
+</html>
