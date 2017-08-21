@@ -7,6 +7,8 @@ for (var r=0;r<=255;r+=20) {
   } 
 }
 
+let standaloneData = null;
+
 
 let canvas = document.querySelector('canvas');
 let ctx = canvas.getContext('2d');
@@ -42,6 +44,50 @@ let serverY = 470;
 let shardY = 450;
 let perServerWidth = 100;
 let perServerHeight = 150;
+
+let getMoveableShards = function() {
+  if (standaloneData) {
+    return Promise.resolve(standaloneData.shards);
+  } else {
+    return fetch('moveable-shards')
+    .then(serversResponse => serversResponse.json())
+  }
+}
+
+let getPossibleServers = function(shard, collection) {
+  if (standaloneData) {
+    return Promise.resolve(standaloneData.servers.slice(1));
+  } else {
+    return fetch('possible-servers?shard=' + shard + '&collection=' + collection)
+    .then(serversResponse => serversResponse.json())
+  }
+}
+
+let getJobState = function(jobId) {
+  if (standaloneData) {
+    if (--standaloneData.jobCalls == 0) {
+      return getPossibleServers()
+      .then(servers => {
+        let chosenServer = servers[Math.floor(Math.random() * servers.length)];
+        return {status: 'finished', toServer: chosenServer.serverId};
+      })
+    } else {
+      return {'status': 'working'};
+    }
+  } else {
+    return fetch('job-state/' + jobId).then(serversResponse => serversResponse.json());
+  }
+}
+
+let startMoveShard = function() {
+  if (standaloneData) {
+    standaloneData.jobCalls = 3;
+    return Promise.resolve(1);
+  } else {
+    return fetch('move-shard', { body: JSON.stringify(gameState.shard.name), method: 'POST'})
+    .then(serversResponse => serversResponse.json());
+  }
+}
 
 let gameState = {};
 function reset() {
@@ -80,8 +126,8 @@ function reset() {
     highlightedServer: null,
     success: null,
   }
-  let moveableShards = fetch('moveable-shards')
-  .then(serversResponse => serversResponse.json())
+
+  return getMoveableShards()
   .then(moveableShards => {
     moveableShards.forEach(shard => {
       let option = document.createElement('option');
@@ -94,16 +140,13 @@ function reset() {
   })
 }
 
-reset();
-
 function shardSelected(shardElement) {
   prontoElement.setAttribute('disabled', 'disabled');
   if (shardElement.value) {
     let shardInfo = gameState.shards.filter(shard => {
       return shard.shard == shardElement.value;
     })[0];
-    return fetch('possible-servers?shard=' + shardElement.value + '&collection=' + shardInfo.collection)
-    .then(serversResponse => serversResponse.json())
+    return getPossibleServers(shardElement.value, shardInfo.collection)
     .then(servers => {
       let start = canvas.width/2-perServerWidth*servers.length/2;
       gameState.shard = {
@@ -118,7 +161,6 @@ function shardSelected(shardElement) {
       gameState.servers = servers.map((server, index) => {
         return {
           id: server.serverId,
-          name: server.name,
           color: possibleColors[Math.floor(Math.random() * possibleColors.length)],
           textColor: possibleColors[Math.floor(Math.random() * possibleColors.length)],
           position: new Victor(
@@ -410,7 +452,7 @@ let simulateMovement = function(jobId) {
 
     promises.push(createHandMovement(gameState.hands.left, capIndex, targetServerIndex));
     promises.push(createHandMovement(gameState.hands.right, otherCapIndex, otherTargetServerIndex));
-    promises.push(fetch('job-state/' + jobId).then(serversResponse => serversResponse.json()));
+    promises.push(getJobState(jobId));
 
     return Promise.all(promises)
     .then(([leftResult, rightResult, job]) => {
@@ -587,8 +629,7 @@ function startMoving() {
   }
   prontoElement.setAttribute('disabled', 'disabled');
 
-  fetch('move-shard', { body: JSON.stringify(gameState.shard.name), method: 'POST'})
-  .then(serversResponse => serversResponse.json())
+  return startMoveShard()
   .then(jobId => {
     moveShard(jobId);
   });
@@ -653,4 +694,12 @@ let moveShard = function(jobId) {
     alert('Error: ' + err);
     reset();
   })
+}
+
+function setStandaloneData(data) {
+  standaloneData = data;
+}
+
+function start() {
+  reset();
 }

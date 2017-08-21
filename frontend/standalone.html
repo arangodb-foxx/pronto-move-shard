@@ -46,6 +46,20 @@
     </div>
     <script type="text/javascript" src="pronto-move-shard.js"></script>
     <script type="text/javascript">
+      setStandaloneData({
+        servers: [
+          {serverId: "1"},
+          {serverId: "2"},
+          {serverId: "3"},
+          {serverId: "4"},
+          {serverId: "5"},
+        ],
+        shards: [{
+            shard: "shard",
+            collection: "fakecollection",
+            servers: ["1"],
+        }],
+      })
       start();
     </script>
   </body>
