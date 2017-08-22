@@ -138,6 +138,9 @@ function reset() {
     gameState.shards = moveableShards;
     shardsElement.removeAttribute("disabled");
   })
+  .catch(err => {
+    alert('Failed getting moveable shards. Is this a single server?');
+  })
 }
 
 function shardSelected(shardElement) {
