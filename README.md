@@ -4,7 +4,7 @@ A shard moving game
 
 ## Description
 
-A quick and dirty game old school flash style game illustrating shard movement within the cluster.
+A quick and dirty old school flash style game illustrating shard movement within the cluster.
 Won't work on a single server.
 
 Please note that there are many unhandled edge cases in this game so please do not install it on a production system.
